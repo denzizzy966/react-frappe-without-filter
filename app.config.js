@@ -1,12 +1,13 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
 
-
 export default {
   "expo": {
-    "name": "changemakers-rn",
-    "slug": "changemakers-rn",
+    "name": "React Frappe",
+    "slug": "changemakers-rn", // Updated to match project slug
+    "owner": "denzizzy",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "halosocia.com",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -14,7 +15,6 @@ export default {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "scheme": "io.frappe.changemakers",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -23,26 +23,46 @@ export default {
       "config": {
         "usesNonExemptEncryption": false
       },
-      "bundleIdentifier": IS_DEV ? 'io.changemakers.dev' : 'io.frappe.changemakers',
+      "bundleIdentifier": IS_DEV ? 'io.changemakers.dev' : 'halosocia.com'
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "io.frappe.changemakers"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "8fdd6952-bd1f-4c65-90fb-3a696ad52c97"
-      }
+      "package": "com.denzizzy.reactfrappe",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "plugins": [
-      "expo-build-properties",
-      "expo-secure-store"
-    ]
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,     // Updated for SDK 34
+            "targetSdkVersion": 34,      // Updated for SDK 34
+            "buildToolsVersion": "34.0.0" // Updated for SDK 34
+          },
+          "ios": {
+            "deploymentTarget": "13.4"
+          }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "07d65df4-d5bd-4826-93d4-46eb637dbad7"
+      }
+    }
   }
 }

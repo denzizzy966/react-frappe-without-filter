@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 3.13.3"
+    "version": ">= 3.13.3",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -9,9 +10,23 @@
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "buildType": "apk"
+      }
+    },
+    "denzizzy": {
+      "distribution": "internal",
       "android": {"buildType": "apk"}
     },
-    "production": {}
+    "production": {
+      "autoIncrement": true
+    }
   },
   "submit": {
     "production": {}

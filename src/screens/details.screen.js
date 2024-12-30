@@ -24,12 +24,26 @@ export const DetailsScreen = () => {
   const { db } = useFrappe();
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, padding: 20}}>
       <Layout
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
       >
+      <Text
+        category="h5"
+        style={{
+          marginBottom: 20,
+          alignSelf: 'flex-start'
+        }}
+      >
+        Details
+      </Text>
+      <Layout
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
+        
         <Layout style={{ marginVertical: 20, position: "relative" }}>
           <ProfileImage source={{
             uri: userInfo.picture, headers: {
@@ -40,43 +54,57 @@ export const DetailsScreen = () => {
           {loading && <CircularProgressBar style={{ position: "absolute", top: 30, left: 30, backgroundColor: "white" }} progress={uploadProgress} />}
         </Layout>
 
+        {errorMessage ? (
+          <Text status="danger" style={{ marginBottom: 10 }}>{errorMessage}</Text>
+        ) : null}
+
         <Button appearance="ghost" onPress={async () => {
-          // implement change profile pic
-          // let the user pick image from gallery
-          let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-          })
+          try {
+            setErrorMessage('');
+            // let the user pick image from gallery
+            let result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            });
 
-          if (!result.canceled) {
-            try {
-              setLoading(true)
-              await uploadFile(result.assets[0].uri, result.assets[0].uri.split('/').pop(), result.assets[0].type, {
-                accessToken: accessToken,
-                onUploadProgress: (progressEvent) => {
-                  let progress = (progressEvent.loaded / progressEvent.total) * 100
-                  setUploadProgress(progress);
-                },
-                onUploadComplete: async (data) => {
-                  const fileUrl = data.message.file_url
-                  await db.updateDoc("User", userInfo.email, {
-                    user_image: fileUrl
-                  })
-                  await fetchUserInfo()
-                  setLoading(false)
-                },
-                isPrivate: false,
-                doctype: "User",
-                docname: userInfo.email,
-                fieldname: "user_image"
-              })
-            } catch (error) {
-              console.log(error)
-              setLoading(false)
+            if (!result.canceled) {
+              setLoading(true);
+              setUploadProgress(0);
+              
+              const uploadResponse = await uploadFile(
+                result.assets[0].uri,
+                result.assets[0].uri.split('/').pop(),
+                'image/jpeg',
+                {
+                  accessToken: accessToken,
+                  onUploadProgress: (progressEvent) => {
+                    const progress = (progressEvent.loaded / progressEvent.total) * 100;
+                    setUploadProgress(progress);
+                  },
+                  onUploadComplete: async (data) => {
+                    if (data?.message?.file_url) {
+                      await db.updateDoc("User", userInfo.email, {
+                        user_image: data.message.file_url
+                      });
+                      await fetchUserInfo();
+                    }
+                  },
+                  isPrivate: false,
+                  doctype: "User",
+                  docname: userInfo.email,
+                  fieldname: "user_image"
+                }
+              );
+
+              console.log('Upload successful:', uploadResponse);
             }
-
+          } catch (error) {
+            console.error('Error during upload:', error);
+            setErrorMessage(error.message || 'Failed to upload image. Please try again.');
+          } finally {
+            setLoading(false);
           }
         }}>Change Profile Pic</Button>
 
@@ -92,6 +120,7 @@ export const DetailsScreen = () => {
             Logout
           </LogoutButton>
         )}
+      </Layout>
       </Layout>
     </SafeAreaView >
   );
